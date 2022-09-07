@@ -69,10 +69,16 @@ int main(void)
 
   MX_GPIO_Init();
 
+  uint32_t tick=0;
+  uint32_t state=0;
   while (1)
   {
-	  HAL_GPIO_TogglePin(LED4_GPIO_Port, LED4_Pin);
-	  HAL_Delay(1000);
+	  if(HAL_GetTick()-tick > 1000)
+	  {
+		  state = !state;
+		  HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, state);
+		  tick=HAL_GetTick();
+	  }
   }
 }
 
