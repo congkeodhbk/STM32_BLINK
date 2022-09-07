@@ -18,7 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
+#include <string.h>
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -60,6 +60,18 @@ static void MX_GPIO_Init(void);
   * @brief  The application entry point.
   * @retval int
   */
+typedef struct{
+	uint8_t state;
+	uint32_t tick;
+	GPIO_TypeDef *Port;
+	uint16_t Pin;
+	uint32_t interval;
+}blink_t;
+
+#define LED_NUM 4
+
+blink_t blink[LED_NUM];
+
 int main(void)
 {
 
@@ -69,15 +81,33 @@ int main(void)
 
   MX_GPIO_Init();
 
-  uint32_t tick=0;
-  uint32_t state=0;
+  memset(blink, 0, sizeof(blink_t)*LED_NUM);
+
+  blink[0].Port = GPIOD;
+  blink[1].Port = GPIOD;
+  blink[2].Port = GPIOD;
+  blink[3].Port = GPIOD;
+
+  blink[0].Pin = LED3_Pin;
+  blink[1].Pin = LED4_Pin;
+  blink[2].Pin = LED5_Pin;
+  blink[3].Pin = LED6_Pin;
+
+  blink[0].interval = 1000;
+  blink[1].interval = 2000;
+  blink[2].interval = 500;
+  blink[3].interval = 250;
+
   while (1)
   {
-	  if(HAL_GetTick()-tick > 1000)
+	  for(int i=0; i<LED_NUM; i++)
 	  {
-		  state = !state;
-		  HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, state);
-		  tick=HAL_GetTick();
+		  if(HAL_GetTick() - blink[i].tick > blink[i].interval)
+		  {
+			  blink[i].state = !blink[i].state;
+			  HAL_GPIO_WritePin(blink[i].Port, blink[i].Pin, blink[i].state);
+			  blink[i].tick = HAL_GetTick();
+		  }
 	  }
   }
 }
@@ -136,14 +166,14 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOD, LED4_Pin|LED3_Pin|LED5_Pin|LED6_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : LED4_Pin */
-  GPIO_InitStruct.Pin = LED4_Pin;
+  /*Configure GPIO pins : LED4_Pin LED3_Pin LED5_Pin LED6_Pin */
+  GPIO_InitStruct.Pin = LED4_Pin|LED3_Pin|LED5_Pin|LED6_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LED4_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
 }
 
