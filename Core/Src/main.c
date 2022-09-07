@@ -66,6 +66,26 @@ static void MX_GPIO_Init(void);
 
 blink_t blink[LED_NUM];
 
+void led3_write(uint8_t level)
+{
+	HAL_GPIO_WritePin(GPIOD, LED3_Pin, level);
+}
+
+void led4_write(uint8_t level)
+{
+	HAL_GPIO_WritePin(GPIOD, LED4_Pin, level);
+}
+
+void led5_write(uint8_t level)
+{
+	HAL_GPIO_WritePin(GPIOD, LED5_Pin, level);
+}
+
+void led6_write(uint8_t level)
+{
+	HAL_GPIO_WritePin(GPIOD, LED6_Pin, level);
+}
+
 int main(void)
 {
 
@@ -73,10 +93,10 @@ int main(void)
   SystemClock_Config();
   MX_GPIO_Init();
 
-  blink_init(blink, GPIOD, LED3_Pin, 1000);
-  blink_init(blink + 1, GPIOD, LED4_Pin, 2000);
-  blink_init(blink + 2, GPIOD, LED5_Pin, 500);
-  blink_init(blink + 3, GPIOD, LED6_Pin, 250);
+  blink_init(blink, led3_write, HAL_GetTick, 1000);
+  blink_init(blink + 1, led4_write, HAL_GetTick, 2000);
+  blink_init(blink + 2, led5_write, HAL_GetTick, 500);
+  blink_init(blink + 3, led6_write, HAL_GetTick, 250);
 
   while (1)
   {

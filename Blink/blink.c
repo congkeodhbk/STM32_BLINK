@@ -7,20 +7,20 @@
 #include <string.h>
 #include "blink.h"
 
-void blink_init(blink_t *blink, GPIO_TypeDef *Port, uint16_t Pin, uint32_t interval)
+void blink_init(blink_t *blink, write_pin_t write, tick_t tick, uint32_t interval)
 {
 	memset(blink, 0, sizeof(blink_t));
-	blink->Port = Port;
-	blink->Pin = Pin;
+	blink->write=write;
+	blink->get_tick=tick;
 	blink->interval = interval;
 }
 
 void blink_process(blink_t *blink)
 {
-	if(HAL_GetTick() - blink->tick > blink->interval)
+	if(blink->get_tick() - blink->tick > blink->interval)
 	{
 	  blink->state = !blink->state;
-	  HAL_GPIO_WritePin(blink->Port, blink->Pin, blink->state);
-	  blink->tick = HAL_GetTick();
+	  blink->write(blink->state);
+	  blink->tick = blink->get_tick();
 	}
 }
