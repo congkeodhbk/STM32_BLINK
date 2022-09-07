@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include <string.h>
+#include "blink.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -60,13 +61,6 @@ static void MX_GPIO_Init(void);
   * @brief  The application entry point.
   * @retval int
   */
-typedef struct{
-	uint8_t state;
-	uint32_t tick;
-	GPIO_TypeDef *Port;
-	uint16_t Pin;
-	uint32_t interval;
-}blink_t;
 
 #define LED_NUM 4
 
@@ -76,38 +70,19 @@ int main(void)
 {
 
   HAL_Init();
-
   SystemClock_Config();
-
   MX_GPIO_Init();
 
-  memset(blink, 0, sizeof(blink_t)*LED_NUM);
-
-  blink[0].Port = GPIOD;
-  blink[1].Port = GPIOD;
-  blink[2].Port = GPIOD;
-  blink[3].Port = GPIOD;
-
-  blink[0].Pin = LED3_Pin;
-  blink[1].Pin = LED4_Pin;
-  blink[2].Pin = LED5_Pin;
-  blink[3].Pin = LED6_Pin;
-
-  blink[0].interval = 1000;
-  blink[1].interval = 2000;
-  blink[2].interval = 500;
-  blink[3].interval = 250;
+  blink_init(blink, GPIOD, LED3_Pin, 1000);
+  blink_init(blink + 1, GPIOD, LED4_Pin, 2000);
+  blink_init(blink + 2, GPIOD, LED5_Pin, 500);
+  blink_init(blink + 3, GPIOD, LED6_Pin, 250);
 
   while (1)
   {
 	  for(int i=0; i<LED_NUM; i++)
 	  {
-		  if(HAL_GetTick() - blink[i].tick > blink[i].interval)
-		  {
-			  blink[i].state = !blink[i].state;
-			  HAL_GPIO_WritePin(blink[i].Port, blink[i].Pin, blink[i].state);
-			  blink[i].tick = HAL_GetTick();
-		  }
+		  blink_process(blink + i);
 	  }
   }
 }
